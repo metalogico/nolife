@@ -22,28 +22,34 @@ Built with Laravel 13, PHP 8.4, Vue 3, TypeScript, Vite and Tailwind CSS 4. Dock
 
 ## Install with Docker Compose
 
-Docker downloads the prebuilt GHCR images for Linux AMD64 or ARM64. No Git, PHP, Python, Composer or Node installation is required on the server. Docker Compose 2.24.4 or newer is required.
+Docker image: **`ghcr.io/metalogico/nolife:latest`**
 
-The workflow publishes images when code reaches `main`. Wait for **Publish Docker images** to succeed and for the GHCR packages to be public before installing. `latest` follows main; `sha-<full commit>` selects a specific build.
+Requires Docker with Compose 2.24.4 or newer. Images support `linux/amd64` and `linux/arm64`.
 
-Download the installation files from main. The archive also contains the source, but installation does not compile it:
+### Download the configuration
+
+For a new installation:
 
 ```sh
 mkdir nolife
 cd nolife
-curl -fL "https://github.com/metalogico/nolife/archive/refs/heads/main.tar.gz" -o source.tar.gz
-tar -xzf source.tar.gz --strip-components=1
-```
-
-For an existing installation, follow [the transition guide](docs/UPGRADING.md) instead of copying a new `.env`. Run the following commands in the extracted directory.
-
-```sh
+curl -fL https://raw.githubusercontent.com/metalogico/nolife/main/compose.yaml -o compose.yaml
+curl -fL https://raw.githubusercontent.com/metalogico/nolife/main/.env.example -o .env.example
 cp .env.example .env
 chmod 600 .env
+```
+
+Already installed? Keep your `.env` and follow [Updating](#update).
+
+Pull the image:
+
+```sh
 docker compose pull
 ```
 
-Generate an application key:
+### Configure the account
+
+Generate the application key:
 
 ```sh
 docker compose run --rm --no-deps --entrypoint php app artisan key:generate --show --no-interaction
@@ -93,29 +99,26 @@ docker compose exec -T --user www-data app php artisan nolife:backup --no-intera
 
 The scheduler runs backups at 03:30 and 15:30 in `APP_TIMEZONE` (Europe/Rome by default). Archives are retained until you remove them. See the [operations guide](docs/installation.md#backup-and-restore) for export, verification and recovery.
 
-## Development
+## Update
 
-The locked stack uses PHP 8.4 and Node 24. For host-based development, install the PHP extensions listed in the Dockerfile, then:
+Create and verify a backup before updating. Stop the app, worker and scheduler before applying migrations:
 
 ```sh
-composer install
-npm ci
-npm run typecheck
-npm run build
-php artisan test --compact
-vendor/bin/pint --dirty --format agent
+docker compose pull
+docker compose stop
+docker compose up -d --wait
 ```
 
-Use a separate development `.env` and database, with `APP_ENV=local` and `APP_DEBUG=true`. The tests use an in-memory SQLite database and isolated media fixtures. The project uses Vue components and Tailwind CSS; frontend formatting is configured in `.prettierrc.json` and `.editorconfig`.
+Keep the same `.env`, Compose project, data and override files. If you pinned an image version, change its reference in `.env` before pulling. See [UPGRADING.md](docs/UPGRADING.md) for recovery and migration details.
+
+## Development
+
+See [Development](docs/RELEASING.md#local-checks-before-merging) for source builds and local tests.
 
 ## Credits and licensing
 
 The NoLife application is licensed under the [MIT License](LICENSE).
 
-The README screenshot is the original collection image from the [NoLife website](https://nolife.metalogico.dev), copied without alteration. Game artwork and metadata come from their respective providers and rights holders.
+Game artwork and metadata belong to their respective providers and rights holders.
 
 Platform assets retain the RomM source revision and upstream notices in [public/platforms/ATTRIBUTIONS](public/platforms/ATTRIBUTIONS) and [LICENSE.romm.txt](public/platforms/LICENSE.romm.txt). Platform assets and other third-party packages retain their own licenses.
-
-## Releases and source builds
-
-See [RELEASING.md](docs/RELEASING.md) for local checks, GHCR publication and schema policy. For local Docker builds, use `docker compose -f compose.yaml -f compose.build.yaml up -d --build --wait` from a source checkout with a separate development environment and data. See the same guide before adding optional backup overrides to a source build.

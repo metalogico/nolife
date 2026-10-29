@@ -1,6 +1,6 @@
 # Installation and operations
 
-The [README](../README.md#install-with-docker-compose) covers a fresh installation. Run the commands below from the extracted installation directory. The default stack pulls a versioned GHCR image.
+The [README](../README.md#install-with-docker-compose) covers a fresh installation. Run the commands below from the directory containing the downloaded `compose.yaml` and your private `.env`. The default stack pulls a versioned GHCR image.
 
 ## Requirements
 
@@ -115,6 +115,12 @@ Move the exported archive to separate storage, together with a protected copy of
 ### Backups on a separate disk
 
 The optional `compose.minipc.yaml` override replaces `/backups` with a bind mount. Despite its filename, it is usable on any Docker host. Prepare an existing directory on the intended mounted disk, with access for UID/GID 33. The app entrypoint adjusts ownership within that directory.
+
+Download the override into the installation directory:
+
+```sh
+curl -fL https://raw.githubusercontent.com/metalogico/nolife/main/compose.minipc.yaml -o compose.minipc.yaml
+```
 
 Add these values to your private `.env`:
 
