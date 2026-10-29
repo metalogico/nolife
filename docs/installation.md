@@ -77,7 +77,7 @@ In a separate private environment file copied from `.env.example`, set fresh cre
 
 ```dotenv
 NOLIFE_ENV_FILE=/absolute/path/to/test.env
-NOLIFE_IMAGE=ghcr.io/metalogico/nolife:1.0.0
+NOLIFE_IMAGE=ghcr.io/metalogico/nolife:latest
 NOLIFE_PORT=18093
 NOLIFE_URL=http://localhost:18093
 ```

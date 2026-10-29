@@ -151,3 +151,7 @@ This project has domain-specific skills available in `**/skills/**`. You MUST ac
 ## Distribuzione pubblica — 29 ottobre 2026
 
 Decisione successiva di Michele: dalla prima immagine pubblica v1.0.0, le migrazioni rilasciate sono immutabili. Aggiungere nuove migrazioni incrementali, preservare i dati e testare gli aggiornamenti. Questa regola sostituisce le precedenti istruzioni di modificare direttamente le migrazioni durante il development. Vedere `docs/RELEASING.md`. Preparazione locale su develop; commit, push, tag e pubblicazione restano a Michele.
+
+## Pubblicazione immagini — aggiornamento del 29 ottobre 2026
+
+Su richiesta di Michele, i test si eseguono in locale. GitHub Actions compila e pubblica solo al push su main (inclusi i merge), con tag latest e sha del commit; nessun workflow su develop, pull request, tag o Release. Nessuna modifica all’identità Git; commit e push li gestisce Michele.

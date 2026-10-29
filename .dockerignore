@@ -32,6 +32,4 @@ recovery
 *.pem
 *.key
 
-# Local release packaging output
-dist-release/
 .github/

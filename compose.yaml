@@ -18,7 +18,7 @@ x-environment: &environment
 
 services:
   app:
-    image: ${NOLIFE_IMAGE:-ghcr.io/metalogico/nolife:1.0.0}
+    image: ${NOLIFE_IMAGE:-ghcr.io/metalogico/nolife:latest}
     init: true
     restart: unless-stopped
     mem_limit: 512m
@@ -37,7 +37,7 @@ services:
       start_period: 30s
       retries: 3
   worker:
-    image: ${NOLIFE_IMAGE:-ghcr.io/metalogico/nolife:1.0.0}
+    image: ${NOLIFE_IMAGE:-ghcr.io/metalogico/nolife:latest}
     init: true
     restart: unless-stopped
     mem_limit: 256m
@@ -54,7 +54,7 @@ services:
       - data:/var/lib/sh-nolife
       - storage:/var/www/html/storage
   scheduler:
-    image: ${NOLIFE_IMAGE:-ghcr.io/metalogico/nolife:1.0.0}
+    image: ${NOLIFE_IMAGE:-ghcr.io/metalogico/nolife:latest}
     init: true
     restart: unless-stopped
     mem_limit: 128m

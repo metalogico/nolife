@@ -50,6 +50,3 @@ Thumbs.db
 !/storage/**/
 !/storage/**/.gitignore
 /bootstrap/cache/*.php
-
-# Local release packaging output
-dist-release/
