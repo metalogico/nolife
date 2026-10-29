@@ -1,18 +1,17 @@
 # Installation and operations
 
-The [README](../README.md#install-with-docker-compose) covers a fresh installation. Run the commands below from the directory containing the downloaded `compose.yaml` and your private `.env`. The default stack pulls a versioned GHCR image.
+For a fresh installation, follow the [README](../README.md#install-with-docker-compose). Run the commands below from the directory containing `compose.yaml` and your private `.env`.
 
 ## Requirements
 
 - Docker Engine and the current Docker Compose plugin, or Docker Desktop with Compose.
 - Internet access for the initial image pull, and sufficient disk space for images, your collection and retained backups.
-- A free host port; the default is 8093. A modern browser is needed for the custom dropdowns and dialogs.
-
-The Dockerfile builds the frontend with Node 24 and installs production PHP dependencies with Composer. Its base images are pinned by digest; `composer.lock` and `package-lock.json` fix application dependency versions. OS packages come from the base distribution's configured repositories. The runtime contains PHP 8.4, Apache, SQLite, GD/WebP and PCNTL. Docker Compose supplies an init process and SIGTERM handling for the worker and scheduler.
+- A free host port; the default is 8093.
+- A modern browser.
 
 ## Configuration
 
-Copy `.env.example` to `.env` and follow the README to generate the application key and password hash. Do not start with the example placeholders. A Docker helper command bypasses the normal entrypoint while generating credentials; startup checks and migrations run when you start the application.
+Copy `.env.example` to `.env` and follow the README to generate the application key and password hash.
 
 | Variable | Purpose |
 | --- | --- |
@@ -26,7 +25,9 @@ Copy `.env.example` to `.env` and follow the README to generate the application 
 | `SESSION_SECURE_COOKIE` | Set to `true` when the browser accesses NoLife over HTTPS |
 | `IGDB_CLIENT_ID`, `IGDB_CLIENT_SECRET` | Optional credentials for metadata search and matching |
 
-Compose explicitly sets production mode, disables debug output, and selects SQLite, file sessions/cache and the database queue. It sets the internal database and backup paths; leave those paths as provided. `APP_URL` is set from `NOLIFE_URL` inside the containers.
+Compose sets production mode, SQLite, file sessions/cache and the database queue. `APP_URL` is set from `NOLIFE_URL` inside the containers.
+
+MCP access and keys are managed in [Settings](mcp.md#manage-mcp-in-settings).
 
 After editing `.env`, recreate all services so the app, worker and scheduler receive the same settings:
 
@@ -50,9 +51,9 @@ For HTTPS, place a reverse proxy in front of Apache, configure its upstream to t
 | `worker` | Image downloads and WebP conversion, with retry handling | 256 MB |
 | `scheduler` | Scheduled database and media backups | 128 MB |
 
-These are container limits rather than a complete host sizing estimate; image builds also need memory. All services restart with `unless-stopped`. Only `app` exposes a port. The worker and scheduler wait for the app health check at `/up` before starting.
+All services restart with `unless-stopped`. Only `app` exposes a port. The worker and scheduler wait for the app health check at `/up` before starting.
 
-The default project name is `sh-nolife`; Compose prefixes the data, storage and backups volumes with it. SQLite uses foreign keys, WAL and a five-second busy timeout. The shared library lock coordinates app and worker mutations with backup snapshots.
+The default project name is `sh-nolife`; Compose prefixes volume names with it.
 
 - `data` is mounted at `/var/lib/sh-nolife` and contains the SQLite database, WAL and shared-memory files.
 - `storage` is mounted at `/var/www/html/storage` and contains private images, file sessions/cache, logs and the library lock.
@@ -71,7 +72,7 @@ Stopping or recreating containers preserves volumes. `docker compose down` also 
 
 ### Separate installations
 
-Use a different Compose project name, port, environment file and image tag for an isolated instance. This is also useful for installation checks without accessing an existing library.
+Use a different Compose project name, port and environment file for an isolated instance.
 
 In a separate private environment file copied from `.env.example`, set fresh credentials and:
 
@@ -91,7 +92,7 @@ docker compose --env-file /absolute/path/to/test.env -p nolife-test up -d --wait
 
 ## Updates
 
-Follow [UPGRADING.md](UPGRADING.md). Keep `.env`, `APP_KEY` and persistent volumes; back up and export before changing versions. Pull the selected image, stop all services including the worker/scheduler, and recreate. The app migrates before becoming healthy. A schema-changing rollback requires its matching backup.
+Follow [UPGRADING.md](UPGRADING.md) for updates and rollback.
 
 ## Backup and restore
 
@@ -114,7 +115,7 @@ Move the exported archive to separate storage, together with a protected copy of
 
 ### Backups on a separate disk
 
-The optional `compose.minipc.yaml` override replaces `/backups` with a bind mount. Despite its filename, it is usable on any Docker host. Prepare an existing directory on the intended mounted disk, with access for UID/GID 33. The app entrypoint adjusts ownership within that directory.
+`compose.minipc.yaml` replaces `/backups` with a bind mount on any Docker host. Prepare a directory on the backup disk with access for UID/GID 33. The app entrypoint adjusts ownership within that directory.
 
 Download the override into the installation directory:
 

@@ -1,15 +1,15 @@
-# Updates and the first image-based installation
+# Updates and rollback
 
 Use `https://github.com/metalogico/nolife/archive/COMMIT.tar.gz` for a source archive matching a pinned image, replacing COMMIT with the full published main commit SHA.
 
 ## Before every update
 
-1. Review the target main commit and migration requirements. Retain the current version/image digest and installation files.
-2. Create and verify a [backup](installation.md#backup-and-restore); export it off the host. Preserve `.env`, application data and any private TLS state. Never copy a live SQLite file without the documented snapshot procedure.
-3. Download the source archive for the target main commit into a **separate directory**. Compare its Compose and example environment with your deployed configuration. Copy approved configuration changes into the existing installation directory; keep your private `.env` and existing override files.
-4. Set `NOLIFE_IMAGE=ghcr.io/metalogico/nolife:sha-COMMIT` in your existing `.env`, replacing COMMIT with the full published main commit SHA. `latest` is also supported, but a pinned commit gives you control over updates. Review new environment variables individually.
+1. Review the target commit and migration requirements. Retain the current image tag or digest and installation files.
+2. Create and verify a [backup](installation.md#backup-and-restore), export it off the host, and preserve `.env`. Use the backup command rather than copying a live SQLite file.
+3. Download the matching source archive into a separate directory. Compare its Compose and example environment with your installation, then apply the required configuration changes. Keep your private `.env` and override files.
+4. Set `NOLIFE_IMAGE=ghcr.io/metalogico/nolife:sha-COMMIT` in `.env`, replacing COMMIT with the full published `main` commit SHA. Use `latest` if you do not need a pinned version.
 
-Use the same `-p`, `--env-file` and `-f` options on **every** command when your deployment uses them. The abbreviated commands below assume the default files and project name. Let image downloads finish; stop the worker and scheduler with the rest of the stack before running migrations.
+Use the same `-p`, `--env-file` and `-f` options on every command when your installation uses them. The commands below assume the default files and project name:
 
 ```sh
 docker compose config --quiet
@@ -19,23 +19,18 @@ docker compose up -d --wait
 docker compose ps
 ```
 
-Pull before stopping to reduce downtime. If the pull fails, the running version remains available. If startup or a migration fails, stop the stack and inspect this stack's logs; do not restart background services against a failed migration. Successful health checks should be followed by sign-in, checking existing records/files, a small edit/upload and a new backup.
+Pull before stopping to reduce downtime. The app applies migrations before becoming healthy; the worker and scheduler start afterward. If startup or a migration fails, stop the stack and inspect its logs before restarting. After an update, sign in, check existing games and media, and verify that editing and backups work.
 
-Stopping/recreating containers preserves persistent storage. **Never run `down -v`, `migrate:fresh`, database resets or volume pruning as part of an update.** Updates do not regenerate credentials, keys or the CA.
+Container recreation preserves persistent storage. **Do not run `down -v`, `migrate:fresh` or volume pruning during an update.** Keep the existing application key and credentials.
 
-## Existing source-built installations: first transition to published images
+## Switching from source builds
 
-Changing the image is safe only when it uses the same storage and a compatible schema. Older development revisions could change migrations in place. The first release does not infer or repair every historical development schema.
+Keep the existing Compose project name, environment file and data mounts when switching to a published image. A different project name selects new empty volumes.
 
-- Record the current Compose project name from container labels, actual volume names and bind mount paths, numeric UID/GID, environment file and override files. `docker compose ps` and `docker inspect <container>` help inspect the installation; avoid sharing their secret-bearing output.
-- Compare the deployed database schema and migration history with the v1 baseline using a **restored copy** of a verified backup. Run the candidate image in a separate project with copied data, separate ports and bind directories. Confirm existing records and files, authentication, migrations and backup/restore. A production mount must never be used for this rehearsal.
-- If the old schema differs, prepare and test a specific incremental migration/import before updating the real stack. Do not delete rows from Laravel's migrations table or reset SQLite's schema version to force startup.
-- Keep the real `.env`, `APP_KEY` where applicable, login values, API credentials and HTTPS CA. Replace only the old local image reference with the GHCR reference. Remove any source-build override from the production command or `COMPOSE_FILE`.
-- Preserve all existing data mounts and the exact Compose project name. A different name selects new empty volumes; that does not mean the original data was erased. Keep external backup disks and their identity markers configured.
-- Perform the regular update above only after the rehearsal succeeds. Retain the old image and backup until the new installation is verified.
+Test the target image with a restored backup in a separate project, using copied data and a different port. Older development databases may differ from the released schema; resolve differences with a tested migration or import before updating the live installation. Do not edit migration history to force startup.
 
-The local smoke script tests a fresh image-only install and persistence across container recreation. GitHub Actions does not run these tests. It does not inspect or migrate a particular home server's historical database.
+Replace the local image reference with the GHCR reference and remove `compose.build.yaml` from the command or `COMPOSE_FILE`. Preserve any backup override and disk marker, then follow the update procedure above.
 
 ## Rollback
 
-After a schema migration, switching back to an older image alone may be unsafe. Stop all writers, restore the matching pre-update database and files using the backup guide, restore the corresponding configuration, and select the previous pinned image tag or digest. Rehearse recovery in an isolated project first. Keep the same application key and CA. MiniFiles refuses a database schema newer than the running image understands.
+An older image may be incompatible with a migrated database. Recovery requires the previous image, its configuration and the matching pre-update backup, keeping the same `APP_KEY`. Test the [restore procedure](installation.md#restore-the-active-collection) with that image in an isolated project before applying it to the live collection. Stop background writers and use maintenance mode during the restore.
