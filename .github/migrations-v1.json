@@ -1,0 +1,10 @@
+{
+  "database/migrations/0001_01_01_000000_create_users_table.php": "10d79883bc08ce46510f9ad8b1830b4d06d586dc56ae2c8bac3b3e491f69a90f",
+  "database/migrations/0001_01_01_000001_create_cache_table.php": "fbb4665e5a977e71df4e74ec75b3c06ca4f17ad0de7138fe9786639189978e77",
+  "database/migrations/0001_01_01_000002_create_jobs_table.php": "df4910687180313a14a3f96a8bddd808ae145ed1b107cd772caf865c0dc2b746",
+  "database/migrations/2026_10_28_213733_create_games_table.php": "4d0dfa15a33ab70c1a03c4065c95ea555b47ae0feaec719cc79c3d0d98461f8e",
+  "database/migrations/2026_10_28_213734_create_game_images_table.php": "54a6939f304dd2f7db7696c0527553246d17e2bf43642651ea098a2161bd012f",
+  "database/migrations/2026_10_28_221155_add_download_failed_at_to_game_images_table.php": "56dd90e60a99ff7460f6ce54f29cf62d86651c23d2ce12adb24c0dc7e955739a",
+  "database/migrations/2026_10_29_000750_add_header_image_id_to_games_table.php": "8c1b2bc6bf50f1aa42fc20a3a847610b3bf77a72adfe5aaea592d1af3e070668",
+  "database/migrations/2026_10_29_085107_add_total_played_minutes_to_games_table.php": "f101e74ee06f5034478c31c8709f6761aff06c6255aaa741806150b308790e9c"
+}

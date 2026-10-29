@@ -1,11 +1,11 @@
 # Installation and operations
 
-The [README](../README.md#install-with-docker-compose) covers a fresh installation. Run the commands below from the repository directory. The default stack builds its own image; it does not require a published NoLife image.
+The [README](../README.md#install-with-docker-compose) covers a fresh installation. Run the commands below from the extracted installation directory. The default stack pulls a versioned GHCR image.
 
 ## Requirements
 
 - Docker Engine and the current Docker Compose plugin, or Docker Desktop with Compose.
-- Git, internet access for the initial build, and sufficient disk space for images, your collection and retained backups.
+- Internet access for the initial image pull, and sufficient disk space for images, your collection and retained backups.
 - A free host port; the default is 8093. A modern browser is needed for the custom dropdowns and dialogs.
 
 The Dockerfile builds the frontend with Node 24 and installs production PHP dependencies with Composer. Its base images are pinned by digest; `composer.lock` and `package-lock.json` fix application dependency versions. OS packages come from the base distribution's configured repositories. The runtime contains PHP 8.4, Apache, SQLite, GD/WebP and PCNTL. Docker Compose supplies an init process and SIGTERM handling for the worker and scheduler.
@@ -77,13 +77,13 @@ In a separate private environment file copied from `.env.example`, set fresh cre
 
 ```dotenv
 NOLIFE_ENV_FILE=/absolute/path/to/test.env
-NOLIFE_IMAGE=nolife-test:local
+NOLIFE_IMAGE=ghcr.io/metalogico/nolife:1.0.0
 NOLIFE_PORT=18093
 NOLIFE_URL=http://localhost:18093
 ```
 
 ```sh
-docker compose --env-file /absolute/path/to/test.env -p nolife-test build
+docker compose --env-file /absolute/path/to/test.env -p nolife-test pull
 docker compose --env-file /absolute/path/to/test.env -p nolife-test up -d --wait
 ```
 
@@ -91,18 +91,7 @@ docker compose --env-file /absolute/path/to/test.env -p nolife-test up -d --wait
 
 ## Updates
 
-Keep `.env` and the persistent volumes. Before changing versions, create a backup, export it off the Docker host and preserve the current source revision and `.env` securely. There is no automatic rollback of database migrations.
-
-```sh
-docker compose exec -T --user www-data app php artisan nolife:backup --no-interaction
-git pull --ff-only
-docker compose build
-docker compose stop worker scheduler
-docker compose up -d --wait
-docker compose ps
-```
-
-The app entrypoint applies migrations before becoming healthy. If startup fails, inspect the app logs and leave the workers stopped until the failure is resolved. Rolling back code after a schema change may require restoring the matching database/media archive. Keep the same project name and volume names when moving the source checkout.
+Follow [UPGRADING.md](UPGRADING.md). Keep `.env`, `APP_KEY` and persistent volumes; back up and export before changing versions. Pull the selected image, stop all services including the worker/scheduler, and recreate. The app migrates before becoming healthy. A schema-changing rollback requires its matching backup.
 
 ## Backup and restore
 
@@ -164,7 +153,7 @@ docker compose start worker scheduler
 
 Run each command only after the previous command succeeds. If restore or migration fails, keep maintenance mode enabled and the background services stopped while you investigate. Live restore verifies the archive before replacing the database and media; it requires both maintenance mode and `--force`.
 
-To recover onto a fresh Docker host, restore the protected `.env` (including its original `APP_KEY`), build and start the matching source version, copy the archive into `/backups` with `docker compose cp`, then follow the live restore procedure. Ensure the copied archive is readable by `www-data`. A restore reuses the data and storage volumes; it replaces the current library and images.
+To recover onto a fresh Docker host, restore the protected `.env` (including its original `APP_KEY`), pull and start the matching image version, copy the archive into `/backups` with `docker compose cp`, then follow the live restore procedure. Ensure the copied archive is readable by `www-data`. A restore reuses the data and storage volumes; it replaces the current library and images.
 
 ## Troubleshooting
 

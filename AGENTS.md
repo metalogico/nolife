@@ -147,3 +147,7 @@ This project has domain-specific skills available in `**/skills/**`. You MUST ac
 - After the feature tests pass, ask the user to run the complete suite with `php artisan test --compact`.
 
 </laravel-boost-guidelines>
+
+## Distribuzione pubblica — 29 ottobre 2026
+
+Decisione successiva di Michele: dalla prima immagine pubblica v1.0.0, le migrazioni rilasciate sono immutabili. Aggiungere nuove migrazioni incrementali, preservare i dati e testare gli aggiornamenti. Questa regola sostituisce le precedenti istruzioni di modificare direttamente le migrazioni durante il development. Vedere `docs/RELEASING.md`. Preparazione locale su develop; commit, push, tag e pubblicazione restano a Michele.

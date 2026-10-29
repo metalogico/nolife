@@ -22,16 +22,28 @@ Built with Laravel 13, PHP 8.4, Vue 3, TypeScript, Vite and Tailwind CSS 4. Dock
 
 ## Install with Docker Compose
 
-You need Git, Docker Engine with the [Compose plugin](https://docs.docker.com/compose/install/), and a free local port (8093 by default). Docker Desktop includes Compose on macOS and Windows. The first build needs internet access. PHP, Composer and Node do not need to be installed on the host.
+Use the versioned installation bundle attached to a successful [GitHub Release](https://github.com/metalogico/nolife/releases). Images are published to `ghcr.io/metalogico/nolife` for Linux AMD64 and ARM64. Docker chooses the host architecture. No Git, PHP, Python, Composer or Node installation is required on the server.
 
-The image is built from this repository, using the committed dependency lockfiles and pinned base images.
+The first planned version is **1.0.0**. These downloads become available after its release workflow succeeds and the GHCR packages are public. On macOS, replace `sha256sum -c` with `shasum -a 256 -c`.
 
 ```sh
-git clone https://github.com/metalogico/nolife.git
+VERSION=1.0.0
+mkdir nolife
 cd nolife
+curl -fLO "https://github.com/metalogico/nolife/releases/download/v${VERSION}/nolife-${VERSION}-install.tar.gz"
+curl -fLO "https://github.com/metalogico/nolife/releases/download/v${VERSION}/SHA256SUMS"
+sha256sum -c SHA256SUMS
+tar -xzf "nolife-${VERSION}-install.tar.gz"
+```
+
+For an existing installation, follow [the transition guide](docs/UPGRADING.md) instead of copying a new `.env`.
+
+You need Docker with Linux containers and Compose 2.24.4 or newer. Run the following commands in the extracted installation directory.
+
+```sh
 cp .env.example .env
 chmod 600 .env
-docker compose build
+docker compose pull
 ```
 
 Generate an application key:
@@ -106,3 +118,7 @@ The NoLife application is licensed under the [MIT License](LICENSE).
 The README screenshot is the original collection image from the [NoLife website](https://nolife.metalogico.dev), copied without alteration. Game artwork and metadata come from their respective providers and rights holders.
 
 Platform assets retain the RomM source revision and upstream notices in [public/platforms/ATTRIBUTIONS](public/platforms/ATTRIBUTIONS) and [LICENSE.romm.txt](public/platforms/LICENSE.romm.txt). Platform assets and other third-party packages retain their own licenses.
+
+## Releases and source builds
+
+See [RELEASING.md](docs/RELEASING.md) for CI, GHCR publication and schema policy. For local Docker builds, use `docker compose -f compose.yaml -f compose.build.yaml up -d --build --wait` from a source checkout with a separate development environment and data. See the same guide before adding optional backup overrides to a source build.
