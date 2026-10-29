@@ -1,0 +1,15 @@
+services:
+  app:
+    volumes:
+      - type: bind
+        source: ${NOLIFE_BACKUP_DIR:?Set the directory on the backup disk}
+        target: /backups
+        bind:
+          create_host_path: false
+  scheduler:
+    volumes:
+      - type: bind
+        source: ${NOLIFE_BACKUP_DIR:?Set the directory on the backup disk}
+        target: /backups
+        bind:
+          create_host_path: false

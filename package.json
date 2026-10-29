@@ -1,0 +1,30 @@
+{
+  "$schema": "https://www.schemastore.org/package.json",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "vite build",
+    "dev": "vite",
+    "typecheck": "vue-tsc --noEmit"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.0.0",
+    "@vitejs/plugin-vue": "^6.0.10",
+    "concurrently": "^10.0.3",
+    "laravel-vite-plugin": "^3.1",
+    "tailwindcss": "^4.0.0",
+    "typescript": "~5.9.3",
+    "vite": "^8.0.0",
+    "vue-tsc": "^3.3.13"
+  },
+  "optionalDependencies": {
+    "@laravel/multiplex": "^0.4.1"
+  },
+  "dependencies": {
+    "@tabler/icons-vue": "^3.50.0",
+    "vanilla-tilt": "^1.8.1",
+    "vue": "^3.5.44",
+    "vue-router": "^4.6.4"
+  },
+  "name": "sh-nolife"
+}

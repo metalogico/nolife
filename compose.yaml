@@ -1,0 +1,79 @@
+name: sh-nolife
+
+x-environment: &environment
+  APP_ENV: production
+  APP_DEBUG: "false"
+  APP_URL: ${NOLIFE_URL:-http://localhost:8093}
+  APP_TIMEZONE: ${APP_TIMEZONE:-Europe/Rome}
+  DB_CONNECTION: sqlite
+  DB_DATABASE: /var/lib/sh-nolife/database.sqlite
+  DB_FOREIGN_KEYS: "true"
+  SESSION_DRIVER: file
+  SESSION_COOKIE: sh_nolife_session
+  SESSION_SECURE_COOKIE: ${SESSION_SECURE_COOKIE:-false}
+  CACHE_STORE: file
+  QUEUE_CONNECTION: database
+  LOG_CHANNEL: stderr
+  NOLIFE_BACKUP_PATH: /backups
+
+services:
+  app:
+    image: ${NOLIFE_IMAGE:-sh-nolife:local}
+    build: .
+    init: true
+    restart: unless-stopped
+    mem_limit: 512m
+    env_file: ${NOLIFE_ENV_FILE:-.env}
+    environment: *environment
+    ports:
+      - "${NOLIFE_BIND_IP:-127.0.0.1}:${NOLIFE_PORT:-8093}:80"
+    volumes:
+      - data:/var/lib/sh-nolife
+      - storage:/var/www/html/storage
+      - backups:/backups
+    healthcheck:
+      test: ["CMD", "php", "-r", "exit(@file_get_contents('http://127.0.0.1/up') === false ? 1 : 0);"]
+      interval: 30s
+      timeout: 5s
+      start_period: 30s
+      retries: 3
+  worker:
+    image: ${NOLIFE_IMAGE:-sh-nolife:local}
+    init: true
+    restart: unless-stopped
+    mem_limit: 256m
+    user: www-data
+    stop_signal: SIGTERM
+    stop_grace_period: 40s
+    env_file: ${NOLIFE_ENV_FILE:-.env}
+    environment: *environment
+    entrypoint: ["php", "artisan", "queue:work", "--sleep=1", "--tries=3", "--timeout=30", "--max-time=3600", "--no-interaction"]
+    depends_on:
+      app:
+        condition: service_healthy
+    volumes:
+      - data:/var/lib/sh-nolife
+      - storage:/var/www/html/storage
+  scheduler:
+    image: ${NOLIFE_IMAGE:-sh-nolife:local}
+    init: true
+    restart: unless-stopped
+    mem_limit: 128m
+    user: www-data
+    stop_signal: SIGTERM
+    stop_grace_period: 120s
+    env_file: ${NOLIFE_ENV_FILE:-.env}
+    environment: *environment
+    entrypoint: ["php", "artisan", "schedule:work", "--no-interaction"]
+    depends_on:
+      app:
+        condition: service_healthy
+    volumes:
+      - data:/var/lib/sh-nolife
+      - storage:/var/www/html/storage
+      - backups:/backups
+
+volumes:
+  data:
+  storage:
+  backups:
