@@ -37,6 +37,7 @@ Build and exercise the image-only installation locally:
 ```sh
 docker build -t nolife:ci .
 python3 .github/scripts/smoke-install.py
+python3 .github/scripts/smoke-mcp.py --image nolife:ci
 ```
 
 The smoke check creates its own project and temporary configuration, checks the web response and data persistence after recreation, and removes only its temporary stack. Repeat the build with `--platform linux/amd64` or `--platform linux/arm64` and run the corresponding image when checking another architecture. Never point tests at production data.

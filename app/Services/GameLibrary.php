@@ -13,6 +13,18 @@ class GameLibrary
 {
     public function __construct(private IgdbClient $igdb) {}
 
+    public function overview(): array
+    {
+        return [
+            'counts' => Game::query()->selectRaw('status, count(*) as total')->groupBy('status')->pluck('total', 'status'),
+            'total' => Game::query()->count(),
+            'platforms' => Game::query()->distinct()->orderBy('platform')->pluck('platform'),
+            'genres' => Game::query()->pluck('genres')->flatten(1)
+                ->filter(fn ($genre): bool => is_string($genre) && trim($genre) !== '')
+                ->unique()->sort(SORT_NATURAL | SORT_FLAG_CASE)->values(),
+        ];
+    }
+
     public function save(?Game $game, array $data): Game
     {
         $metadata = null;

@@ -111,6 +111,10 @@ docker compose up -d --wait
 
 Keep the same `.env`, Compose project, data and override files. If you pinned an image version, change its reference in `.env` before pulling. See [UPGRADING.md](docs/UPGRADING.md) for recovery and migration details.
 
+## MCP for local agents
+
+An optional [MCP server](docs/mcp.md) lets agents search and read the collection, rank personal ratings or playtime, and add or update game copies. It uses the existing web service and separate read/write bearer credentials. Open **Settings → MCP server** to enable access and generate, regenerate or revoke either key. Changes apply immediately and persist across container recreation. MCP is disabled by default. Internet research and series comparisons remain the agent's responsibility; no model or series catalog is added to NoLife.
+
 ## Development
 
 See [Development](docs/RELEASING.md#local-checks-before-merging) for source builds and local tests.

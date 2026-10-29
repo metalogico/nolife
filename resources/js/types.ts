@@ -110,3 +110,15 @@ export function formatDuration(minutes: number | null): string {
   }
   return new Intl.NumberFormat('en', { maximumFractionDigits: 1 }).format(minutes / 60) + ' h'
 }
+
+export type McpAccessLevel = 'read' | 'write'
+export interface McpSettingsState {
+  enabled: boolean
+  url: string
+  keys: Record<McpAccessLevel, { configured: boolean; generated_at: string | null }>
+}
+export interface McpGeneratedKey {
+  access: McpAccessLevel
+  token: string
+  settings: McpSettingsState
+}

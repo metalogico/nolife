@@ -3,6 +3,7 @@
 use App\Http\Controllers\GameController;
 use App\Http\Controllers\GameImageController;
 use App\Http\Controllers\IgdbController;
+use App\Http\Controllers\McpSettingsController;
 use App\Http\Controllers\SessionController;
 use Illuminate\Support\Facades\Route;
 
@@ -13,6 +14,12 @@ Route::prefix('api/v1')->name('api.')->group(function (): void {
 
     Route::middleware('personal')->group(function (): void {
         Route::get('library', [GameController::class, 'library'])->name('library');
+        Route::get('settings/mcp', [McpSettingsController::class, 'show'])->name('mcp-settings.show');
+        Route::patch('settings/mcp', [McpSettingsController::class, 'update'])->name('mcp-settings.update');
+        Route::post('settings/mcp/tokens/{access}', [McpSettingsController::class, 'store'])
+            ->whereIn('access', ['read', 'write'])->name('mcp-settings.tokens.store');
+        Route::delete('settings/mcp/tokens/{access}', [McpSettingsController::class, 'destroy'])
+            ->whereIn('access', ['read', 'write'])->name('mcp-settings.tokens.destroy');
         Route::apiResource('games', GameController::class);
         Route::post('games/{game}/metadata', [IgdbController::class, 'store'])->name('metadata.store');
         Route::post('games/{game}/cover', [GameImageController::class, 'store'])->name('cover.store');
@@ -26,4 +33,4 @@ Route::get('media/{image}/{variant?}', [GameImageController::class, 'show'])
     ->middleware('personal')
     ->name('media.show');
 
-Route::view('/{path?}', 'app')->where('path', '(?!api/|media/).*')->name('app');
+Route::view('/{path?}', 'app')->where('path', '(?!api/|media/|mcp(?:/|$)).*')->name('app');

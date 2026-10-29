@@ -49,16 +49,9 @@ class GameController extends Controller
         return GameResource::collection($query->orderBy('id')->paginate(36)->withQueryString());
     }
 
-    public function library(): JsonResponse
+    public function library(GameLibrary $library): JsonResponse
     {
-        return response()->json([
-            'counts' => Game::query()->selectRaw('status, count(*) as total')->groupBy('status')->pluck('total', 'status'),
-            'total' => Game::query()->count(),
-            'platforms' => Game::query()->distinct()->orderBy('platform')->pluck('platform'),
-            'genres' => Game::query()->pluck('genres')->flatten(1)
-                ->filter(fn ($genre): bool => is_string($genre) && trim($genre) !== '')
-                ->unique()->sort(SORT_NATURAL | SORT_FLAG_CASE)->values(),
-        ]);
+        return response()->json($library->overview());
     }
 
     public function store(SaveGameRequest $request, GameLibrary $library): GameResource

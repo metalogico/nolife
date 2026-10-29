@@ -22,6 +22,7 @@ import {
   IconTrash,
   IconCheck,
   IconArrowRight,
+  IconSettings,
 } from '@tabler/icons-vue'
 import type { Component } from 'vue'
 import { router } from './router'
@@ -53,6 +54,7 @@ import DialogShell from './components/DialogShell.vue'
 import ActionMenu from './components/ActionMenu.vue'
 import type { MenuItem } from './components/ActionMenu.vue'
 import ImageViewer from './components/ImageViewer.vue'
+import McpSettings from './components/McpSettings.vue'
 
 const route = useRoute()
 const session = ref<Session | null>(null)
@@ -98,6 +100,7 @@ type Modal =
   | { kind: 'edit'; game: Game }
   | { kind: 'delete'; game: Game }
   | { kind: 'images'; index: number }
+  | { kind: 'settings' }
 const modal = shallowRef<Modal | null>(null)
 const showLoading = ref(false)
 let loadingTimer: ReturnType<typeof setTimeout>
@@ -425,6 +428,13 @@ async function closeGame() {
   await motionNavigate('/' + view.value, selectedId.value || undefined)
 }
 
+async function openSettings() {
+  mobileNav.value = false
+  menu.value = null
+  await nextTick()
+  modal.value = { kind: 'settings' }
+}
+
 function addGame() {
   modal.value = {
     kind: 'metadata',
@@ -724,10 +734,25 @@ onBeforeUnmount(() => {
       </div>
       <div class="sidebar-footer">
         <span class="user-avatar">{{ session.username?.slice(0, 1).toUpperCase() }}</span>
-        <span>{{ session.username }}</span>
-        <button class="icon-button" aria-label="Sign out" data-tooltip="Sign out" @click="signOut">
-          <IconLogout :size="19" />
-        </button>
+        <span class="min-w-0 flex-1 truncate">{{ session.username }}</span>
+        <div class="ml-auto flex shrink-0 items-center gap-1">
+          <button
+            class="icon-button ml-0! h-8! w-8!"
+            aria-label="Settings"
+            data-tooltip="Settings"
+            @click="openSettings"
+          >
+            <IconSettings :size="19" />
+          </button>
+          <button
+            class="icon-button ml-0! h-8! w-8!"
+            aria-label="Sign out"
+            data-tooltip="Sign out"
+            @click="signOut"
+          >
+            <IconLogout :size="19" />
+          </button>
+        </div>
       </div>
     </aside>
     <div class="app-main" :inert="narrowScreen && mobileNav">
@@ -989,6 +1014,15 @@ onBeforeUnmount(() => {
           }}</button
         >
       </footer>
+    </DialogShell>
+    <DialogShell
+      v-else-if="modal?.kind === 'settings'"
+      title="Settings"
+      description="Manage connections to your library."
+      size="medium"
+      @close="modal = null"
+    >
+      <McpSettings />
     </DialogShell>
     <ImageViewer
       v-else-if="modal?.kind === 'images' && selected"
