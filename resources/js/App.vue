@@ -23,6 +23,7 @@ import {
   IconCheck,
   IconArrowRight,
   IconSettings,
+  IconChartBar,
 } from '@tabler/icons-vue'
 import type { Component } from 'vue'
 import { router } from './router'
@@ -54,7 +55,9 @@ import DialogShell from './components/DialogShell.vue'
 import ActionMenu from './components/ActionMenu.vue'
 import type { MenuItem } from './components/ActionMenu.vue'
 import ImageViewer from './components/ImageViewer.vue'
-import McpSettings from './components/McpSettings.vue'
+import SettingsPage from './components/SettingsPage.vue'
+import StatisticsPage from './components/StatisticsPage.vue'
+import { clearStatistics, loadStatistics } from './statistics'
 
 const route = useRoute()
 const session = ref<Session | null>(null)
@@ -100,7 +103,6 @@ type Modal =
   | { kind: 'edit'; game: Game }
   | { kind: 'delete'; game: Game }
   | { kind: 'images'; index: number }
-  | { kind: 'settings' }
 const modal = shallowRef<Modal | null>(null)
 const showLoading = ref(false)
 let loadingTimer: ReturnType<typeof setTimeout>
@@ -126,7 +128,13 @@ const navIcons: Record<LibraryView, Component> = {
   dropped: IconCircleX,
   collection: IconBooks,
 }
-const view = computed(() => (route.params.view || 'playing') as LibraryView)
+const isStatistics = computed(() => route.meta.statistics === true)
+const isSettings = computed(() => route.meta.settings === true)
+const isLibrary = computed(() => !isStatistics.value && !isSettings.value)
+const view = computed(
+  () => (route.params.view || (isLibrary.value ? 'playing' : 'collection')) as LibraryView,
+)
+const sectionPath = computed(() => (isStatistics.value ? '/statistics' : '/' + view.value))
 const selectedId = computed(() => (route.params.id ? Number(route.params.id) : null))
 function queryValue(key: string) {
   const value = route.query[key]
@@ -154,14 +162,17 @@ const selected = computed(() => {
   return games.value.find((game) => game.id === selectedId.value) || null
 })
 const visibleGames = computed(() =>
-  games.value.filter((game) => view.value === 'collection' || game.status === view.value),
+  isLibrary.value
+    ? games.value.filter((game) => view.value === 'collection' || game.status === view.value)
+    : [],
 )
-const ambient = computed(
-  () =>
-    selected.value?.ambient_url ||
-    hoveredGame.value?.ambient_url ||
-    visibleGames.value[0]?.ambient_url ||
-    null,
+const ambient = computed(() =>
+  isSettings.value
+    ? null
+    : selected.value?.ambient_url ||
+      hoveredGame.value?.ambient_url ||
+      visibleGames.value[0]?.ambient_url ||
+      null,
 )
 const lightboxImages = computed(
   () => selected.value?.images.filter((image) => image.kind !== 'cover') || [],
@@ -227,6 +238,7 @@ async function signOut() {
     }
     games.value = []
     activeGame.value = null
+    clearStatistics()
     modal.value = null
     menu.value = null
     hoveredGame.value = null
@@ -242,17 +254,19 @@ async function unauthorized() {
   }
   modal.value = null
   menu.value = null
+  clearStatistics()
   try {
     session.value = await api<Session>('session')
     setCsrfToken(session.value.csrf_token)
   } catch {}
 }
 watch(
-  () => [session.value?.authenticated, filterKey.value],
+  () => [session.value?.authenticated, filterKey.value, isLibrary.value, isSettings.value],
   async () => {
-    searchInput.value = filters.value.q
+    clearTimeout(searchTimer)
+    searchInput.value = isLibrary.value ? filters.value.q : ''
     hoveredGame.value = null
-    if (session.value?.authenticated) {
+    if (session.value?.authenticated && isLibrary.value) {
       await loadGames(filters.value)
     }
   },
@@ -274,13 +288,13 @@ watch(
     } catch (error) {
       if (selectedId.value === id) {
         notify(error instanceof Error ? error.message : 'Game not found.', true)
-        await router.replace({ path: '/' + view.value, query: route.query })
+        await router.replace({ path: sectionPath.value, query: route.query })
       }
     }
   },
   { immediate: true },
 )
-watch([selectedId, filterKey], () => {
+watch([selectedId, filterKey, isLibrary], () => {
   if (!selectedId.value) {
     restoringScroll.value = true
   }
@@ -306,6 +320,7 @@ watch(
 async function loadNearBottom() {
   if (
     !session.value?.authenticated ||
+    !isLibrary.value ||
     selectedId.value ||
     modal.value ||
     restoringScroll.value ||
@@ -366,34 +381,46 @@ async function goView(next: LibraryView) {
   mobileNav.value = false
   clearTimeout(searchTimer)
   searchInput.value = ''
-  const query = { ...route.query }
+  const query = isLibrary.value ? { ...route.query } : {}
   delete query.q
   await router.push({ path: '/' + next, query })
+}
+
+async function goStatistics() {
+  rememberScroll()
+  mobileNav.value = false
+  hoveredGame.value = null
+  clearTimeout(searchTimer)
+  searchInput.value = ''
+  await router.push('/statistics')
 }
 
 function searchChanged() {
   clearTimeout(searchTimer)
   searchTimer = setTimeout(() => {
-    const query = { ...route.query }
+    const query = isLibrary.value ? { ...route.query } : {}
     const value = searchInput.value.trim()
     if (value) {
       query.q = value
     } else {
       delete query.q
     }
-    router[view.value === 'collection' ? 'replace' : 'push']({ path: '/collection', query })
+    router[view.value === 'collection' && isLibrary.value ? 'replace' : 'push']({
+      path: '/collection',
+      query,
+    })
   }, 280)
 }
 
 function setFilter(key: string, value: string) {
   rememberScroll()
-  const query = { ...route.query }
+  const query = isLibrary.value ? { ...route.query } : {}
   if (value) {
     query[key] = value
   } else {
     delete query[key]
   }
-  router.push({ path: '/' + view.value, query })
+  router.push({ path: isLibrary.value ? '/' + view.value : '/collection', query })
   mobileNav.value = false
 }
 
@@ -421,18 +448,25 @@ async function motionNavigate(path: string, gameId?: number) {
 async function openGame(game: Game) {
   rememberScroll()
   activeGame.value = game
-  await motionNavigate('/' + view.value + '/games/' + game.id, game.id)
+  await motionNavigate(sectionPath.value + '/games/' + game.id, game.id)
+}
+
+async function openStatisticsGame(id: number) {
+  await motionNavigate('/statistics/games/' + id)
 }
 
 async function closeGame() {
-  await motionNavigate('/' + view.value, selectedId.value || undefined)
+  await motionNavigate(sectionPath.value, selectedId.value || undefined)
 }
 
 async function openSettings() {
+  rememberScroll()
   mobileNav.value = false
   menu.value = null
-  await nextTick()
-  modal.value = { kind: 'settings' }
+  hoveredGame.value = null
+  clearTimeout(searchTimer)
+  searchInput.value = ''
+  await router.push('/settings')
 }
 
 function addGame() {
@@ -508,6 +542,9 @@ async function updateGame(game: Game, changes: Partial<Game>): Promise<boolean> 
     })
     replaceGame(result.data)
     await loadInfo()
+    if (isStatistics.value) {
+      await loadStatistics()
+    }
     if (
       changes.status &&
       selectedId.value === game.id &&
@@ -535,6 +572,13 @@ async function saved(game: Game) {
   modal.value = null
   replaceGame(game)
   await loadInfo()
+  if (isStatistics.value) {
+    await loadStatistics()
+    if (!isNew) {
+      notify('Game updated')
+      return
+    }
+  }
   if (isNew) {
     activeGame.value = game
     await router.push('/' + game.status + '/games/' + game.id)
@@ -561,9 +605,12 @@ async function removeGame() {
     await api('games/' + game.id, { method: 'DELETE' })
     modal.value = null
     if (selectedId.value === game.id) {
-      await router.replace({ path: '/' + view.value, query: route.query })
+      await router.replace({ path: sectionPath.value, query: route.query })
     }
-    await Promise.all([loadInfo(), loadGames(filters.value)])
+    await Promise.all([
+      loadInfo(),
+      isStatistics.value ? loadStatistics() : loadGames(filters.value),
+    ])
     notify('Game removed from your collection')
   } catch (error) {
     deleteError.value = error instanceof Error ? error.message : 'The game could not be removed.'
@@ -595,7 +642,11 @@ onMounted(() => {
       try {
         await loadGame(selected.value.id)
       } catch {}
-    } else if (page.value === 1 && games.value.some((game) => game.images_pending)) {
+    } else if (
+      isLibrary.value &&
+      page.value === 1 &&
+      games.value.some((game) => game.images_pending)
+    ) {
       await loadGames(filters.value, false, true)
     }
   }, 5000)
@@ -698,8 +749,8 @@ onBeforeUnmount(() => {
         <button
           v-for="item in statuses"
           :key="item"
-          :class="['nav-item', { active: view === item }]"
-          :aria-current="view === item ? 'page' : undefined"
+          :class="['nav-item', { active: isLibrary && view === item }]"
+          :aria-current="isLibrary && view === item ? 'page' : undefined"
           @click="goView(item)"
         >
           <component :is="navIcons[item]" :size="21" stroke="1.7" />
@@ -708,24 +759,35 @@ onBeforeUnmount(() => {
         </button>
         <div class="nav-divider" />
         <button
-          :class="['nav-item', { active: view === 'collection' }]"
-          :aria-current="view === 'collection' ? 'page' : undefined"
+          :class="['nav-item', { active: isLibrary && view === 'collection' }]"
+          :aria-current="isLibrary && view === 'collection' ? 'page' : undefined"
           @click="goView('collection')"
         >
           <IconBooks :size="21" stroke="1.7" />
           <span>Collection</span>
           <small v-if="info.total">{{ info.total }}</small>
         </button>
+        <button
+          :class="['nav-item', { active: isStatistics }]"
+          :aria-current="isStatistics ? 'page' : undefined"
+          @click="goStatistics"
+        >
+          <IconChartBar :size="21" stroke="1.7" />
+          <span>Statistics</span>
+        </button>
       </nav>
       <div v-if="info.platforms.length" class="platform-nav">
         <p class="eyebrow">Platforms</p>
-        <button :class="{ active: !filters.platform }" @click="setFilter('platform', '')">
+        <button
+          :class="{ active: isLibrary && !filters.platform }"
+          @click="setFilter('platform', '')"
+        >
           <PlatformIcon />All platforms</button
         >
         <button
           v-for="platform in info.platforms"
           :key="platform"
-          :class="{ active: filters.platform === platform }"
+          :class="{ active: isLibrary && filters.platform === platform }"
           @click="setFilter('platform', platform)"
         >
           <PlatformIcon :platform="platform" />
@@ -739,6 +801,7 @@ onBeforeUnmount(() => {
           <button
             class="icon-button ml-0! h-8! w-8!"
             aria-label="Settings"
+            :aria-current="isSettings ? 'page' : undefined"
             data-tooltip="Settings"
             @click="openSettings"
           >
@@ -792,6 +855,7 @@ onBeforeUnmount(() => {
         :game="selected"
         :games="visibleGames"
         :view="view"
+        :back-label="isStatistics ? 'Statistics' : undefined"
         :transition-id="transitionId"
         :busy="busyGame === selected.id"
         :save-playtime="updateGame"
@@ -809,6 +873,8 @@ onBeforeUnmount(() => {
         <IconLoader2 :size="30" class="spin" />
         <span>Loading game…</span>
       </div>
+      <StatisticsPage v-else-if="isStatistics" @open="openStatisticsGame" />
+      <SettingsPage v-else-if="isSettings" />
       <section
         v-else
         ref="gallery"
@@ -1014,15 +1080,6 @@ onBeforeUnmount(() => {
           }}</button
         >
       </footer>
-    </DialogShell>
-    <DialogShell
-      v-else-if="modal?.kind === 'settings'"
-      title="Settings"
-      description="Manage connections to your library."
-      size="medium"
-      @close="modal = null"
-    >
-      <McpSettings />
     </DialogShell>
     <ImageViewer
       v-else-if="modal?.kind === 'images' && selected"

@@ -70,6 +70,52 @@ export interface Page<T> {
   data: T[]
   meta: { current_page: number; last_page: number; total: number }
 }
+
+export interface StatisticsGame {
+  id: number
+  title: string
+  platform: string
+  format: GameFormat
+  thumbnail_url: string | null
+  total_played_minutes: number | null
+  duration_minutes: number | null
+  rating: number | null
+}
+export interface StatisticsGroup {
+  name: string
+  count: number
+  played_minutes: number | null
+  played_count: number
+  completed_count: number
+  completed_percentage: number | null
+  average_rating: number | null
+  rated_count: number
+}
+export interface Statistics {
+  collection: {
+    total: number
+    statuses: { status: GameStatus; count: number; percentage: number | null }[]
+    completed_percentage: number | null
+    started_count: number
+    started_completed_percentage: number | null
+  }
+  playtime: { total_minutes: number | null; recorded_count: number; top_games: StatisticsGame[] }
+  backlog: {
+    count: number
+    known_duration_count: number
+    expected_minutes: number | null
+    short_games: StatisticsGame[]
+  }
+  genres: { classified_count: number; groups: StatisticsGroup[] }
+  platforms: StatisticsGroup[]
+  formats: { format: GameFormat; count: number; percentage: number | null }[]
+  ratings: {
+    average: number | null
+    rated_count: number
+    distribution: { rating: number; count: number; percentage: number | null }[]
+    favorites: StatisticsGame[]
+  }
+}
 export const statuses: GameStatus[] = ['playing', 'planned', 'completed', 'tried', 'dropped']
 export const labels: Record<LibraryView, string> = {
   playing: 'Playing',

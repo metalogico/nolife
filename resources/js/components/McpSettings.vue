@@ -194,11 +194,7 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div
-    ref="root"
-    class="min-h-0 overflow-y-auto px-7 pb-7 max-sm:px-5"
-    :aria-busy="Boolean(busy) || loading"
-  >
+  <div ref="root" :aria-busy="Boolean(busy) || loading">
     <div v-if="loading" class="flex items-center gap-3 py-8 text-sm text-[#a5b197]" role="status">
       <IconLoader2 class="spin" :size="20" /> Loading settings…
     </div>
@@ -209,7 +205,7 @@ onBeforeUnmount(() => {
         <div class="min-w-0">
           <div class="mb-2 flex items-center gap-2">
             <IconPlugConnected :size="19" class="text-accent" />
-            <h3 id="mcp-settings-heading" class="text-base font-semibold">MCP server</h3>
+            <h2 id="mcp-settings-heading" class="text-base font-semibold">MCP server</h2>
           </div>
           <p class="max-w-md text-sm leading-relaxed text-[#a5b197]"
             >Connect your agents to your game library.</p
@@ -266,7 +262,7 @@ onBeforeUnmount(() => {
         >
           <div class="mb-3 flex items-center gap-2">
             <IconKey :size="18" class="text-[#a5b197]" />
-            <h4 class="text-sm font-semibold">{{ level.title }}</h4>
+            <h3 class="text-sm font-semibold">{{ level.title }}</h3>
           </div>
           <p class="mb-4! flex-1 text-xs leading-relaxed text-[#a5b197]">{{ level.description }}</p>
           <p
@@ -321,9 +317,9 @@ onBeforeUnmount(() => {
         class="rounded-lg border border-[#d6bb6a]/30 bg-[#d6bb6a]/5 p-4"
         role="alert"
       >
-        <h4 class="mb-2 text-sm font-semibold"
+        <h3 class="mb-2 text-sm font-semibold"
           >{{ pending.operation === 'revoke' ? 'Revoke' : 'Regenerate' }}
-          {{ accessLabel(pending.access).toLowerCase() }} key?</h4
+          {{ accessLabel(pending.access).toLowerCase() }} key?</h3
         >
         <p class="text-xs leading-relaxed text-[#c5c5b4]"
           >Agents using the current key will lose access.
@@ -359,7 +355,7 @@ onBeforeUnmount(() => {
       >
         <div class="mb-2 flex items-center gap-2 text-accent" role="status">
           <IconCheck :size="18" />
-          <h4 class="text-sm font-semibold">{{ accessLabel(generated.access) }} key generated</h4>
+          <h3 class="text-sm font-semibold">{{ accessLabel(generated.access) }} key generated</h3>
         </div>
         <p class="mb-3! text-xs leading-relaxed text-[#bdc9b2]"
           >Copy this key now and save it in your agent. It will not be shown again.</p

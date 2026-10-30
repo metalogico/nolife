@@ -21,6 +21,7 @@ const props = defineProps<{
   game: Game
   games: Game[]
   view: LibraryView
+  backLabel?: string
   transitionId?: number | null
   busy?: boolean
   savePlaytime: (game: Game, changes: Partial<Game>) => Promise<boolean>
@@ -78,7 +79,7 @@ onBeforeUnmount(() => contextObserver?.disconnect())
     <aside class="context-list" aria-label="Games in this view">
       <div class="context-heading">
         <button class="text-button" @click="emit('back')">
-          <IconArrowLeft :size="18" />{{ labels[view] }}</button
+          <IconArrowLeft :size="18" />{{ backLabel || labels[view] }}</button
         >
       </div>
       <div ref="contextScroll" class="context-scroll">
@@ -133,9 +134,13 @@ onBeforeUnmount(() => contextObserver?.disconnect())
             />
           </Transition>
           <div class="detail-artwork-shade" />
-          <button class="back-button" aria-label="Back to collection" @click="emit('back')">
+          <button
+            class="back-button"
+            :aria-label="'Back to ' + (backLabel || labels[view])"
+            @click="emit('back')"
+          >
             <IconArrowLeft :size="20" />
-            <span>{{ labels[view] }}</span>
+            <span>{{ backLabel || labels[view] }}</span>
           </button>
         </div>
         <div class="detail-content" :key="game.id">

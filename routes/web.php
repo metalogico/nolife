@@ -5,6 +5,7 @@ use App\Http\Controllers\GameImageController;
 use App\Http\Controllers\IgdbController;
 use App\Http\Controllers\McpSettingsController;
 use App\Http\Controllers\SessionController;
+use App\Http\Controllers\StatisticsController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('api/v1')->name('api.')->group(function (): void {
@@ -14,6 +15,7 @@ Route::prefix('api/v1')->name('api.')->group(function (): void {
 
     Route::middleware('personal')->group(function (): void {
         Route::get('library', [GameController::class, 'library'])->name('library');
+        Route::get('statistics', StatisticsController::class)->name('statistics');
         Route::get('settings/mcp', [McpSettingsController::class, 'show'])->name('mcp-settings.show');
         Route::patch('settings/mcp', [McpSettingsController::class, 'update'])->name('mcp-settings.update');
         Route::post('settings/mcp/tokens/{access}', [McpSettingsController::class, 'store'])
