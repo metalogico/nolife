@@ -16,9 +16,9 @@ A self-hosted game collection for keeping track of what you are playing, what yo
 - Manual entry with cover uploads, or IGDB search by title or ID with a preview before importing.
 - Local cover art and screenshots, background image selection and an image viewer.
 - A responsive English interface with keyboard controls and reduced-motion support.
-- One password-protected personal account, persistent SQLite storage, and scheduled database and media backups.
+- One password-protected personal account and persistent SQLite storage.
 
-Built with Laravel 13, PHP 8.4, Vue 3, TypeScript, Vite and Tailwind CSS 4. Docker Compose runs the web application, image worker and backup scheduler.
+Built with Laravel 13, PHP 8.4, Vue 3, TypeScript, Vite and Tailwind CSS 4. Docker Compose runs the web application and image worker.
 
 ## Install with Docker Compose
 
@@ -67,7 +67,7 @@ Set `NOLIFE_USERNAME` to your chosen username. Copy the entire `NOLIFE_PASSWORD_
 docker compose up -d --wait
 ```
 
-Open [localhost:8093](http://localhost:8093) and sign in. The collection starts empty. The default bind address is `127.0.0.1`; LAN access, HTTPS, backups, updates and recovery are covered in the [installation guide](docs/installation.md).
+Open [localhost:8093](http://localhost:8093) and sign in. The collection starts empty. The default bind address is `127.0.0.1`; LAN access, HTTPS and updates are covered in the [installation guide](docs/installation.md).
 
 ## Use
 
@@ -87,21 +87,17 @@ The default Compose project is `sh-nolife`. Its named volumes contain:
 | --- | --- |
 | `sh-nolife_data` | SQLite database and its WAL files |
 | `sh-nolife_storage` | Images, sessions, cache, logs and the library lock |
-| `sh-nolife_backups` | Database and media backup archives |
 
-Container recreation preserves these volumes. Keep a protected copy of `.env`, especially `APP_KEY`. Backups in a named volume are on the Docker host; copy them to a separate disk for recovery from host failure.
+Container recreation preserves these volumes. Keep your private `.env`, especially `APP_KEY`, across updates.
 
 ```sh
 docker compose ps
-docker compose logs --tail 50 app worker scheduler
-docker compose exec -T --user www-data app php artisan nolife:backup --no-interaction
+docker compose logs --tail 50 app worker
 ```
-
-The scheduler runs backups at 03:30 and 15:30 in `APP_TIMEZONE` (Europe/Rome by default). Archives are retained until you remove them. See the [operations guide](docs/installation.md#backup-and-restore) for export, verification and recovery.
 
 ## Update
 
-Create and verify a backup before updating. Stop the app, worker and scheduler before applying migrations:
+Stop the app and worker before applying migrations:
 
 ```sh
 docker compose pull
@@ -109,7 +105,7 @@ docker compose stop
 docker compose up -d --wait
 ```
 
-Keep the same `.env`, Compose project, data and override files. If you pinned an image version, change its reference in `.env` before pulling. See [UPGRADING.md](docs/UPGRADING.md) for recovery and migration details.
+Keep the same `.env`, Compose project, data and override files. If you pinned an image version, change its reference in `.env` before pulling. See [UPGRADING.md](docs/UPGRADING.md) for update and migration details.
 
 ## MCP for local agents
 

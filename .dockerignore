@@ -22,8 +22,6 @@ README.private.md
 AGENTS.md
 boost.json
 docs
-backups
-recovery
 *.sqlite*
 *.db
 *.tar

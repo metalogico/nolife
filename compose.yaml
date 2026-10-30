@@ -14,7 +14,6 @@ x-environment: &environment
   CACHE_STORE: file
   QUEUE_CONNECTION: database
   LOG_CHANNEL: stderr
-  NOLIFE_BACKUP_PATH: /backups
 
 services:
   app:
@@ -29,7 +28,6 @@ services:
     volumes:
       - data:/var/lib/sh-nolife
       - storage:/var/www/html/storage
-      - backups:/backups
     healthcheck:
       test: ["CMD", "php", "-r", "exit(@file_get_contents('http://127.0.0.1/up') === false ? 1 : 0);"]
       interval: 30s
@@ -53,26 +51,6 @@ services:
     volumes:
       - data:/var/lib/sh-nolife
       - storage:/var/www/html/storage
-  scheduler:
-    image: ${NOLIFE_IMAGE:-ghcr.io/metalogico/nolife:latest}
-    init: true
-    restart: unless-stopped
-    mem_limit: 128m
-    user: www-data
-    stop_signal: SIGTERM
-    stop_grace_period: 120s
-    env_file: ${NOLIFE_ENV_FILE:-.env}
-    environment: *environment
-    entrypoint: ["php", "artisan", "schedule:work", "--no-interaction"]
-    depends_on:
-      app:
-        condition: service_healthy
-    volumes:
-      - data:/var/lib/sh-nolife
-      - storage:/var/www/html/storage
-      - backups:/backups
-
 volumes:
   data:
   storage:
-  backups:

@@ -5,5 +5,3 @@ services:
     image: ${NOLIFE_BUILD_IMAGE:-nolife:dev}
   worker:
     image: ${NOLIFE_BUILD_IMAGE:-nolife:dev}
-  scheduler:
-    image: ${NOLIFE_BUILD_IMAGE:-nolife:dev}

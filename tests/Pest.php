@@ -53,7 +53,7 @@ function something()
 }
 
 pest()->use(LazilyRefreshDatabase::class)->in('Feature/SessionControllerTest.php', 'Feature/GameControllerTest.php', 'Feature/IgdbControllerTest.php');
-pest()->use(DatabaseMigrations::class)->in('Feature/MediaAndBackupTest.php');
+pest()->use(DatabaseMigrations::class)->in('Feature/MediaTest.php');
 
 function personalSession(): array
 {

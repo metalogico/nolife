@@ -15,7 +15,7 @@ Each access level has one key. **Regenerate key** replaces that key and immediat
 
 Disabling MCP blocks requests but keeps the keys for reactivation. Changes take effect on the next request, without editing `.env` or restarting containers.
 
-Settings and key hashes are stored in SQLite and included in backups. Plaintext keys are returned only when generated and cleared from the interface when Settings closes. If clipboard access is unavailable, copy the selected text with your keyboard.
+Settings and key hashes are stored in SQLite. Plaintext keys are returned only when generated and cleared from the interface when Settings closes. If clipboard access is unavailable, copy the selected text with your keyboard.
 
 Settings requires the signed-in browser session and CSRF protection. MCP keys cannot access the management API.
 

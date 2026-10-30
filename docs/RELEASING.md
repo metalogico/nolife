@@ -54,6 +54,6 @@ Keep both `-f` options for subsequent commands. The override uses `nolife:dev`; 
 
 Released migration filenames and contents are immutable. Add schema changes as new timestamped Laravel migrations in `database/migrations/`. App startup runs `migrate --force`; it must never reset or seed the database.
 
-The migration guard checks `.github/migrations-v1.json` and migrations from `origin/main` and stable Git tags. Do not change the baseline hashes to bypass a failure. Test new migrations against a fresh database and an upgrade from the previous release with existing records and media. Verify data preservation and recovery after failure. Document restore requirements when a schema change prevents running an older image.
+The migration guard checks `.github/migrations-v1.json` and migrations from `origin/main` and stable Git tags. Do not change the baseline hashes to bypass a failure. Test new migrations against a fresh database and an upgrade from the previous release with existing records and media. Verify data preservation and recovery after failure. Document schema compatibility requirements when a schema change prevents running an older image.
 
 See [UPGRADING.md](UPGRADING.md) for update and rollback procedures.
