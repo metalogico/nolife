@@ -10,6 +10,7 @@ export const loadingMore = ref(false)
 export const libraryError = ref('')
 export const page = ref(1)
 export const lastPage = ref(1)
+export const libraryRevision = ref(0)
 let collectionController: AbortController | null = null
 const queryCache = new Map<
   string,
@@ -99,6 +100,20 @@ export async function loadGames(filters: Filters, append = false, silent = false
   }
 }
 let latestGameRequest = 0
+export function resetLibrary(): void {
+  collectionController?.abort()
+  latestGameRequest++
+  queryCache.clear()
+  games.value = []
+  activeGame.value = null
+  loading.value = false
+  loadingMore.value = false
+  libraryError.value = ''
+  page.value = 1
+  lastPage.value = 1
+  libraryRevision.value++
+}
+
 export async function loadGame(id: number): Promise<Game> {
   const requestId = ++latestGameRequest
   const result = await api<{ data: Game }>('games/' + id)

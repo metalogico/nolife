@@ -38,7 +38,13 @@ export async function api<T>(path: string, options: RequestInit = {}): Promise<T
     const firstError = Object.values(body.errors || {}).flat()[0]
     throw new ApiError(
       response.status,
-      String(firstError || body.message || 'Something went wrong. Please try again.'),
+      String(
+        firstError ||
+          body.message ||
+          (response.status === 413
+            ? 'The uploaded file is too large.'
+            : 'Something went wrong. Please try again.'),
+      ),
       body.errors || {},
     )
   }

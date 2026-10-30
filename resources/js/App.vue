@@ -37,6 +37,7 @@ import {
   libraryError,
   page,
   lastPage,
+  libraryRevision,
   loadGames,
   loadGame,
   loadInfo,
@@ -261,7 +262,13 @@ async function unauthorized() {
   } catch {}
 }
 watch(
-  () => [session.value?.authenticated, filterKey.value, isLibrary.value, isSettings.value],
+  () => [
+    session.value?.authenticated,
+    filterKey.value,
+    isLibrary.value,
+    isSettings.value,
+    libraryRevision.value,
+  ],
   async () => {
     clearTimeout(searchTimer)
     searchInput.value = isLibrary.value ? filters.value.q : ''
@@ -273,7 +280,7 @@ watch(
   { immediate: true },
 )
 watch(
-  () => [session.value?.authenticated, selectedId.value],
+  () => [session.value?.authenticated, selectedId.value, libraryRevision.value],
   async () => {
     if (!session.value?.authenticated || !selectedId.value) {
       return
@@ -294,7 +301,18 @@ watch(
   },
   { immediate: true },
 )
-watch([selectedId, filterKey, isLibrary], () => {
+watch(libraryRevision, async () => {
+  scrollPositions.clear()
+  try {
+    await loadInfo()
+    if (isStatistics.value) {
+      await loadStatistics()
+    }
+  } catch (error) {
+    notify(error instanceof Error ? error.message : 'The library could not be refreshed.', true)
+  }
+})
+watch([selectedId, filterKey, isLibrary, libraryRevision], () => {
   if (!selectedId.value) {
     restoringScroll.value = true
   }

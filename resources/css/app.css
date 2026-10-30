@@ -2458,6 +2458,13 @@ svg {
   width: 100%;
   max-width: 960px;
 }
+.library-transfer {
+  margin-bottom: 28px;
+  padding: 20px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #ffffff06;
+}
 .settings-heading {
   margin: 6px 0 28px;
 }
@@ -2512,7 +2519,7 @@ svg {
 }
 .statistics-hero {
   display: grid;
-  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   border: 1px solid #b8f34a38;
   border-radius: 12px;
   background: linear-gradient(115deg, #b8f34a0c, #181c17d9 65%);

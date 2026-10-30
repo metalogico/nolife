@@ -3,6 +3,7 @@
 use App\Http\Controllers\GameController;
 use App\Http\Controllers\GameImageController;
 use App\Http\Controllers\IgdbController;
+use App\Http\Controllers\LibraryTransferController;
 use App\Http\Controllers\McpSettingsController;
 use App\Http\Controllers\SessionController;
 use App\Http\Controllers\StatisticsController;
@@ -16,6 +17,10 @@ Route::prefix('api/v1')->name('api.')->group(function (): void {
     Route::middleware('personal')->group(function (): void {
         Route::get('library', [GameController::class, 'library'])->name('library');
         Route::get('statistics', StatisticsController::class)->name('statistics');
+        Route::post('settings/library/export', [LibraryTransferController::class, 'export'])->name('library-transfer.export');
+        Route::get('settings/library/export/{id}', [LibraryTransferController::class, 'download'])
+            ->whereUuid('id')->name('library-transfer.download');
+        Route::post('settings/library/import', [LibraryTransferController::class, 'import'])->name('library-transfer.import');
         Route::get('settings/mcp', [McpSettingsController::class, 'show'])->name('mcp-settings.show');
         Route::patch('settings/mcp', [McpSettingsController::class, 'update'])->name('mcp-settings.update');
         Route::post('settings/mcp/tokens/{access}', [McpSettingsController::class, 'store'])
