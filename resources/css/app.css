@@ -423,8 +423,10 @@ svg {
 .nav-item:hover svg {
   transform: translateX(2px);
 }
-.nav-item small {
+.nav-item small,
+.platform-nav small {
   margin-left: auto;
+  flex-shrink: 0;
   font-size: 11px;
   color: #969f8d;
   font-variant-numeric: tabular-nums;

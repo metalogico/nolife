@@ -56,6 +56,7 @@ export interface LibraryInfo {
   counts: Partial<Record<GameStatus, number>>
   total: number
   platforms: string[]
+  platform_counts: Record<string, number>
   genres: string[]
 }
 export interface Filters {

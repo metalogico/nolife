@@ -810,6 +810,7 @@ onBeforeUnmount(() => {
         >
           <PlatformIcon :platform="platform" />
           <span>{{ platform }}</span>
+          <small>{{ info.platform_counts[platform] }}</small>
         </button>
       </div>
       <div class="sidebar-footer">

@@ -164,18 +164,29 @@ async function confirmAction(): Promise<void> {
   if (active && !pending.value) await restoreKeyFocus(action.access)
 }
 
+function copySelectedInput(input: HTMLInputElement | HTMLTextAreaElement): boolean {
+  input.focus()
+  input.select()
+  try {
+    return document.execCommand('copy')
+  } catch {
+    return false
+  }
+}
+
 async function copy(kind: 'url' | 'key'): Promise<void> {
   const value = kind === 'url' ? settings.value?.url : generated.value?.token
-  if (!value) return
+  const input = kind === 'url' ? urlInput.value : keyInput.value
+  if (!value || !input) return
+  const copiedNotice = kind === 'url' ? 'Server URL copied.' : 'Key copied. Save it in your agent.'
   try {
     if (!navigator.clipboard?.writeText) throw new Error('Clipboard unavailable')
     await navigator.clipboard.writeText(value)
-    notice.value = kind === 'url' ? 'Server URL copied.' : 'Key copied. Save it in your agent.'
+    notice.value = copiedNotice
   } catch {
-    const input = kind === 'url' ? urlInput.value : keyInput.value
-    input?.focus()
-    input?.select()
-    notice.value = 'Text selected. Press Ctrl+C or ⌘C to copy.'
+    notice.value = copySelectedInput(input)
+      ? copiedNotice
+      : 'Automatic copy failed. Text selected. Press Ctrl+C or ⌘C to copy.'
   }
 }
 

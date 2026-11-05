@@ -4,7 +4,13 @@ import type { Game, LibraryInfo, Filters, Page } from './types'
 
 export const games = ref<Game[]>([])
 export const activeGame = ref<Game | null>(null)
-export const info = ref<LibraryInfo>({ counts: {}, total: 0, platforms: [], genres: [] })
+export const info = ref<LibraryInfo>({
+  counts: {},
+  total: 0,
+  platforms: [],
+  platform_counts: {},
+  genres: [],
+})
 export const loading = ref(false)
 export const loadingMore = ref(false)
 export const libraryError = ref('')

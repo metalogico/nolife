@@ -160,6 +160,17 @@ it('treats wildcard search characters as literal text', function (): void {
     $this->withSession(personalSession())->getJson('/api/v1/games?q=%25')->assertOk()->assertJsonPath('meta.total', 1);
 });
 
+it('counts every platform copy across statuses and formats beyond the first gallery page', function (): void {
+    $games = Game::factory()->count(37)->create(['platform' => 'PS5']);
+    Game::factory()->playing()->create(['title' => $games->first()->title, 'platform' => 'PS5', 'format' => 'digital']);
+    Game::factory()->create(['platform' => 'PC', 'status' => 'completed']);
+
+    $this->withSession(personalSession())->getJson('/api/v1/library')->assertOk()
+        ->assertJsonPath('platforms', ['PC', 'PS5'])
+        ->assertJsonPath('platform_counts', ['PC' => 1, 'PS5' => 38])
+        ->assertJsonPath('total', 39);
+});
+
 it('lists distinct genres from the whole collection in alphabetical order', function (): void {
     Game::factory()->playing()->create(['genres' => ['Shooter', 'Adventure']]);
     Game::factory()->create(['genres' => ['Adventure', 'Role-playing (RPG)']]);

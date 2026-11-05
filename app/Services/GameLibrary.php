@@ -15,10 +15,14 @@ class GameLibrary
 
     public function overview(): array
     {
+        $platforms = Game::query()->selectRaw('platform, count(*) as total')
+            ->groupBy('platform')->orderBy('platform')->get();
+
         return [
             'counts' => Game::query()->selectRaw('status, count(*) as total')->groupBy('status')->pluck('total', 'status'),
             'total' => Game::query()->count(),
-            'platforms' => Game::query()->distinct()->orderBy('platform')->pluck('platform'),
+            'platforms' => $platforms->pluck('platform'),
+            'platform_counts' => $platforms->pluck('total', 'platform'),
             'genres' => Game::query()->pluck('genres')->flatten(1)
                 ->filter(fn ($genre): bool => is_string($genre) && trim($genre) !== '')
                 ->unique()->sort(SORT_NATURAL | SORT_FLAG_CASE)->values(),
