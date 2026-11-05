@@ -31,6 +31,7 @@ Thumbs.db
 !.env.example
 
 # Local operations, runtime data and publication checks
+/build.sh
 /README.private.md
 /design-qa.md
 /.agents/
