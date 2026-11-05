@@ -16,6 +16,7 @@ A self-hosted game collection for keeping track of what you are playing, what yo
 - Manual entry with cover uploads, or IGDB search by title or ID with a preview before importing.
 - Local cover art and screenshots, background image selection and an image viewer.
 - A responsive English interface with keyboard controls and reduced-motion support.
+- An optional [MCP server](docs/mcp.md) for agents to search your library, read ratings and playtime, and add or update games with separate read-only and read/write keys.
 - One password-protected personal account and persistent SQLite storage.
 
 Built with Laravel 13, PHP 8.4, Vue 3, TypeScript, Vite and Tailwind CSS 4. Docker Compose runs the web application and image worker.
@@ -105,15 +106,11 @@ docker compose stop
 docker compose up -d --wait
 ```
 
-Keep the same `.env`, Compose project, data and override files. If you pinned an image version, change its reference in `.env` before pulling. See [UPGRADING.md](docs/UPGRADING.md) for update and migration details.
+Keep the same `.env`, Compose project, data and override files. If you pinned an image version, change its reference in `.env` before pulling.
 
 ## MCP for local agents
 
 An optional [MCP server](docs/mcp.md) lets agents search and read the collection, rank personal ratings or playtime, and add or update game copies. It uses the existing web service and separate read/write bearer credentials. Open **Settings → MCP server** to enable access and generate, regenerate or revoke either key. Changes apply immediately and persist across container recreation. MCP is disabled by default. Internet research and series comparisons remain the agent's responsibility; no model or series catalog is added to NoLife.
-
-## Development
-
-See [Development](docs/RELEASING.md#local-checks-before-merging) for source builds and local tests.
 
 ## Credits and licensing
 

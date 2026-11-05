@@ -90,7 +90,7 @@ docker compose --env-file /absolute/path/to/test.env -p nolife-test up -d --wait
 
 ## Updates
 
-Follow [UPGRADING.md](UPGRADING.md) for updates and rollback.
+Follow the [update steps in the README](../README.md#update).
 
 ## Troubleshooting
 

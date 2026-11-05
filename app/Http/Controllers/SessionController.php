@@ -16,6 +16,7 @@ class SessionController extends Controller
         $authenticated = $access->authenticated($request);
 
         return response()->json([
+            'version' => config('nolife.version'),
             'authenticated' => $authenticated,
             'configured' => $access->configured(),
             'username' => $authenticated ? config('nolife.username') : null,

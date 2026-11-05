@@ -893,7 +893,7 @@ onBeforeUnmount(() => {
         <span>Loading game…</span>
       </div>
       <StatisticsPage v-else-if="isStatistics" @open="openStatisticsGame" />
-      <SettingsPage v-else-if="isSettings" />
+      <SettingsPage v-else-if="isSettings" :version="session.version" />
       <section
         v-else
         ref="gallery"

@@ -7,7 +7,10 @@ beforeEach(function (): void {
 });
 
 it('exposes session state without disclosing credentials', function (): void {
+    config(['nolife.version' => '2.3.4-test']);
+
     $this->getJson('/api/v1/session')->assertOk()
+        ->assertJsonPath('version', '2.3.4-test')
         ->assertJsonPath('authenticated', false)
         ->assertJsonPath('configured', true)
         ->assertJsonPath('username', null)

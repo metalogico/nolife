@@ -46,6 +46,7 @@ export interface IgdbGame {
   images: { kind: string; source_id: string; url: string }[]
 }
 export interface Session {
+  version: string
   authenticated: boolean
   configured: boolean
   username: string | null

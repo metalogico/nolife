@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'version' => '1.0.3',
     'username' => env('NOLIFE_USERNAME', ''),
     'password_hash' => env('NOLIFE_PASSWORD_HASH', ''),
     'igdb_client_id' => env('IGDB_CLIENT_ID', ''),
